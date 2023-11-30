@@ -1,0 +1,8 @@
+{
+    
+    "require": {
+        "mikecao/flight": "^2.0",
+        "giggsey/libphonenumber-for-php": "^8.13",
+        "phpmailer/phpmailer": "^6.8"
+    }
+}
