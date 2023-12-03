@@ -7,8 +7,11 @@ WORKDIR /var/www/html
 # Copy the current directory contents into the container
 COPY . /var/www/html
 
-# Install MySQLi extension
-RUN docker-php-ext-install pdo_pgsql
+# Install PostgreSQL extension
+RUN apt-get update \
+    && apt-get install -y \
+        libpq-dev \
+    && docker-php-ext-install pdo_pgsql
 
 # Enable apache modules
 RUN a2enmod rewrite
