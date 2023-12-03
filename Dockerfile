@@ -8,7 +8,7 @@ WORKDIR /var/www/html
 COPY . /var/www/html
 
 # Install MySQLi extension
-RUN docker-php-ext-install mysqli && docker-php-ext-enable mysqli
+RUN docker-php-ext-install pdo_pgsql
 
 # Enable apache modules
 RUN a2enmod rewrite
