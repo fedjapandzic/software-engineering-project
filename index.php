@@ -151,7 +151,7 @@ Flight::route('POST /registracija', function(){
         //Content
         $mail->isHTML(true);
         $mail->Subject = 'Verification link for SSSD Project';
-        $mail->Body    = 'Thank you for registering! Please click on the link to verify your email: <a href=' . "http://localhost:80/sssd-project/verify/$email_verification_token" . '>Verify Email</a>';
+        $mail->Body    = 'Thank you for registering! Please click on the link to verify your email: <a href=' . "http://sssd-project.onrender.com/verify/$email_verification_token" . '>Verify Email</a>';
     
         $mail->send();
         echo 'Message has been sent';
