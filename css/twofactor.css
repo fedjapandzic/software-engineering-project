@@ -1,0 +1,24 @@
+body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.container {
+    text-align: center;
+}
+
+.input-group {
+    margin-bottom: 15px;
+}
+
+#codeInput {
+    text-align: center;
+}
+
+#smsNote {
+    font-size: 12px;
+    color: #666;
+}

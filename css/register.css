@@ -1,0 +1,23 @@
+body {
+    background-color: #f8f9fa;
+    padding: 20px;
+}
+
+h2 {
+    color: #209229;
+    text-align: center;
+}
+
+form {
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+label {
+    margin-top: 10px;
+    color: #16581b;
+}
+
+input {
+    margin-bottom: 10px;
+}

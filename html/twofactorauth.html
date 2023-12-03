@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2 Factor Authentication</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/twofactor.css">
+</head>
+<body>
+    <div class="container">
+        <h3>Your Code</h3>
+        
+        <form action="/sssd-project/submitCode" method="post" id="submitCodeForm">
+            <div class="input-group">
+                <input type="text" class="form-control" id="code_input" name="code_input" placeholder="Enter your 4-digit code" required>
+            </div>
+            
+            <p id="smsNote">The code will be delivered via SMS. Please be patient.</p>
+        </form>
+
+        <form action="/sssd-project/sendSMSCode" method="post" id="sendCodeForm">
+            <button type="submit" class="btn btn-primary">Send Code</button>
+        </form>
+    
+    <!-- Bootstrap JS and Popper.js scripts (required for Bootstrap components) -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    
+</body>
+</html>
