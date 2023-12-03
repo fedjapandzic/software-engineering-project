@@ -7,8 +7,6 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
 
-$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
-$dotenv->load();
 $host=Config::$DB_HOST;
 $user=Config::$DB_USERNAME;
 $password=Config::$DB_PASSWORD;
