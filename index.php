@@ -2,22 +2,66 @@
 session_start();
 
 require 'vendor/autoload.php';
+require_once __DIR__ . '/config.php';
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
 
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
 $dotenv->load();
+$host=Config::$DB_HOST;
+$user=Config::$DB_USERNAME;
+$password=Config::$DB_PASSWORD;
+$port=Config::$DB_PORT;
+$dbname=Config::$DB_NAME;
 
-Flight::register('db', 'mysqli', array($_ENV['DB_HOST'], $_ENV['DB_USERNAME'], $_ENV['DB_PASSWORD'], 'sssd'));
+$db=pg_connect("host=$host port=$port dbname=$dbname user=$user password=$password");
 
 
 Flight::route('/', function(){
     include 'html/register.html';
 });
 
+Flight::route('/createTable', function(){
+
+    global $db;
+    $query="CREATE TABLE \"account\" (
+        \"uid\" serial PRIMARY KEY,
+        \"full_name\" varchar(256) NOT NULL,
+        \"username\" varchar(256) NOT NULL,
+        \"email\" varchar(256) NOT NULL,
+        \"phone_number\" varchar(20) NOT NULL,
+        \"password_hashed\" varchar(512) NOT NULL,
+        \"email_verification_token\" varchar(64) DEFAULT NULL,
+        \"is_verified\" smallint NOT NULL DEFAULT 0
+    );";
+      $result = pg_query($db, $query);
+      if($result){
+        echo "It works!";
+      }
+      else{
+        echo "it don' work :(";
+      }
+});
+
+Flight::route('/account', function(){
+    global $db;
+    $query = "SELECT * FROM account";
+    $result = pg_query($db, $query);
+    if($result){
+        echo "it worked";
+        return $result;
+    }
+    else{
+        echo "didnt work";
+    }
+});
+
+
+
 Flight::route('POST /registracija', function(){
     
+    global $db;
     $full_name = Flight::request()->data->full_name;
     $username = Flight::request()->data->username;
     $email = Flight::request()->data->email;
@@ -36,9 +80,9 @@ Flight::route('POST /registracija', function(){
         return;
     }
     $check_username_query = "SELECT * FROM account WHERE username='$username' LIMIT 1";
-    $result_username = Flight::db()->query($check_username_query);
+    $result_username = pg_query($db,$check_username_query);
 
-    if ($result_username->num_rows > 0) {
+    if (pg_num_rows($result_username) > 0) {
         Flight::json(['error' => 'Username already exists. Choose a different username.']);
         return;
     }
@@ -96,12 +140,12 @@ Flight::route('POST /registracija', function(){
         //Server settings
         $mail->SMTPDebug = 1; // Enable verbose debug output
         $mail->isSMTP();
-        $mail->Host = $_ENV['SMTP_HOST'];;
+        $mail->Host = Config::$SMTP_HOST;
         $mail->SMTPAuth = true;
-        $mail->Username = $_ENV['SMTP_USERNAME']; // Your Gmail username
-        $mail->Password = $_ENV['SMTP_PASSWORD']; // Your Gmail password
-        $mail->SMTPSecure = 'ssl'; // Enable TLS encryption, `ssl` also accepted
-        $mail->Port = $_ENV['SMTP_PORT']; // TCP port to connect to
+        $mail->Username = Config::$SMTP_USERNAME; // Your Gmail username
+        $mail->Password = Config::$SMTP_PASSWORD; // Your Gmail password
+        $mail->SMTPSecure = 'ssl'; // Enable TLS encryption, `ssl` also accep   ted
+        $mail->Port = Config::$SMTP_PORT; // TCP port to connect to
         //Recipients
         $mail->setFrom('fedjapandzic1@gmail.com', 'Fedja Pandzic');
         $mail->addAddress($email, $full_name);
@@ -119,10 +163,10 @@ Flight::route('POST /registracija', function(){
 
     //Check phone number requirements
     // Check if phone number is unique
-    $check_phone_query = "SELECT * FROM account WHERE phone_number = $phone_number";
-    $result = Flight::db()->query($check_phone_query);
+    $check_phone_query = "SELECT * FROM account WHERE phone_number = '$phone_number'";
+    $result = pg_query($db, $check_phone_query);
 
-    if ($result->num_rows > 0) {
+    if (pg_num_rows($result) > 0) {
         Flight::json(['error' => 'Phone number is already registered.']);
         return;
     }
@@ -147,16 +191,16 @@ Flight::route('POST /registracija', function(){
 
     // Inserting user into database
     $insert_user_query = "INSERT INTO account (full_name, username, email, phone_number, password_hashed,email_verification_token,is_verified) 
-                        VALUES ('$full_name', '$username', '$email', $phone_number, '$hashed_password','$email_verification_token', 0)";
+                        VALUES ('$full_name', '$username', '$email', '$phone_number', '$hashed_password','$email_verification_token', 0)";
 
-    $result = Flight::db()->query($insert_user_query);
+    $result = pg_query($db, $insert_user_query);
 
     if ($result) {
         echo '<script>alert("Check your email for verification purposes.")</script>';
         Flight::redirect('/login');
     } else {
     // Query failed, handle the error
-        Flight::json(['error' => 'Error inserting user: ' . mysqli_error(Flight::db())]);
+        Flight::json(['error' => 'Error inserting user ']);
     }
 
    
@@ -164,11 +208,12 @@ Flight::route('POST /registracija', function(){
 });
 
 Flight::route('/verify/@EVT', function($EVT){
+    global $db;
     $evt_exists_query = "SELECT * FROM account WHERE email_verification_token = '$EVT' LIMIT 1";
-    $result = Flight::db()->query($evt_exists_query);
+    $result = pg_query($db, $evt_exists_query);
     if($result){
         $update_verification_query = "UPDATE account SET is_verified = 1 WHERE email_verification_token = '$EVT'";
-        Flight::db()->query($update_verification_query);
+        pg_query($db, $update_verification_query);
         Flight::redirect("/UserVerified");
     }
     else{
@@ -212,6 +257,7 @@ Flight::route('/changePassword', function(){
 });
 
 Flight::route('POST /passwordChange', function(){
+    global $db;
     $old_pass = Flight::request()->data->old_password;
     $new_pass = Flight::request()->data->new_password;
     $repeat_pass = Flight::request()->data->repeat_new_password;
@@ -232,8 +278,9 @@ Flight::route('POST /passwordChange', function(){
         else{
             $hashed_password = password_hash($new_pass, PASSWORD_BCRYPT);
             $change_pass_query = "UPDATE account SET password_hashed = '$hashed_password' WHERE password_hashed='$old_hashed_pass'";
-            Flight::db()->query($change_pass_query);
+            pg_query($db, $change_pass_query);
             echo '<script>alert("Password successfully updated")</script>';
+            sleep(3);
             Flight::redirect('/login');
         }
     }
@@ -268,8 +315,8 @@ Flight::route('POST /sendSMSCode', function(){
         'from' => 'Vonage APIs',
         'text' => "Your code: $code",
         'to' => "$phone",
-        'api_key' => $_ENV['NEXMO_API_KEY'],
-        'api_secret' => $_ENV['NEXMO_API_SECRET']
+        'api_key' => Config::$NEXMO_API_KEY,
+        'api_secret' => Config::$NEXMO_API_SECRET
     )));
 
     $result = curl_exec($ch);
@@ -297,6 +344,7 @@ Flight::route('POST /submitCode', function(){
 });
 
 Flight::route('POST /loginUser', function(){
+    global $db;
     $username_or_email = Flight::request()->data->username_or_email;
     $password = Flight::request()->data->password;
 
@@ -311,14 +359,14 @@ Flight::route('POST /loginUser', function(){
 
     // Fetch user from the database based on email/username
     $fetch_user_query = "SELECT * FROM account WHERE $field = '$username_or_email' LIMIT 1";
-    $result = Flight::db()->query($fetch_user_query);
+    $result = pg_query($db, $fetch_user_query);
 
-    if ($result->num_rows === 0) {
+    if (pg_num_rows($result) === 0) {
         Flight::json(['error' => 'Invalid username/email or password.']);
         return;
     }
 
-    $user = $result->fetch_assoc();
+    $user = pg_fetch_assoc($result);
 
     // Verify the password
     if (password_verify($password, $user['password_hashed']) && $user['is_verified']==1) {
@@ -332,6 +380,12 @@ Flight::route('POST /loginUser', function(){
         echo '<script>alert("Invalid password or user may not be verified. Please check your email for verification.")</script>';
         include 'html/login.html';
     }
+});
+
+Flight::route('/delete', function(){
+    global $db;
+    $query= "DELETE FROM account WHERE email='fedjap01@gmail.com'";
+    pg_query($db,$query);
 });
 
 
