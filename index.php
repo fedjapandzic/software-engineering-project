@@ -2,16 +2,17 @@
 session_start();
 
 require 'vendor/autoload.php';
-require_once __DIR__ . '/etc/secrets/config.php';
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+$dotenv->load();
 
-$host=Config::$DB_HOST;
-$user=Config::$DB_USERNAME;
-$password=Config::$DB_PASSWORD;
-$port=Config::$DB_PORT;
-$dbname=Config::$DB_NAME;
+$host = getenv('DB_HOST');
+$user = getenv('DB_USERNAME');
+$password = getenv('DB_PASSWORD');
+$port = getenv('DB_PORT');
+$dbname = getenv('DB_NAME');
 
 $db=pg_connect("host=$host port=$port dbname=$dbname user=$user password=$password");
 
@@ -136,12 +137,12 @@ Flight::route('POST /registracija', function(){
         //Server settings
         $mail->SMTPDebug = 0;
         $mail->isSMTP();
-        $mail->Host = Config::$SMTP_HOST;
+        $mail->Host = getenv('SMTP_HOST');
         $mail->SMTPAuth = true;
-        $mail->Username = Config::$SMTP_USERNAME; // Your Gmail username
-        $mail->Password = Config::$SMTP_PASSWORD; // Your Gmail password
+        $mail->Username = getenv('SMTP_USERNAME'); // Your Gmail username
+        $mail->Password = getenv('SMTP_PASSWORD'); // Your Gmail password
         $mail->SMTPSecure = 'ssl'; // Enable TLS encryption, `ssl` also accepted
-        $mail->Port = Config::$SMTP_PORT; // TCP port to connect to
+        $mail->Port = getenv('SMTP_PORT'); // TCP port to connect to
         //Recipients
         $mail->setFrom('fedjapandzic1@gmail.com', 'Fedja Pandzic');
         $mail->addAddress($email, $full_name);
@@ -290,8 +291,8 @@ Flight::route('POST /sendSMSCode', function(){
         'from' => 'Vonage APIs',
         'text' => "Your code: $code",
         'to' => "$phone",
-        'api_key' => Config::$NEXMO_API_KEY,
-        'api_secret' => Config::$NEXMO_API_SECRET
+        'api_key' => getenv('NEXMO_API_KEY'),
+        'api_secret' => getenv('NEXMO_API_SECRET')
     )));
 
     $result = curl_exec($ch);
