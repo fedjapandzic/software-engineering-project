@@ -20,43 +20,6 @@ Flight::route('/', function(){
     include 'html/register.html';
 });
 
-Flight::route('/createTable', function(){
-
-    global $db;
-    $query="CREATE TABLE \"account\" (
-        \"uid\" serial PRIMARY KEY,
-        \"full_name\" varchar(256) NOT NULL,
-        \"username\" varchar(256) NOT NULL,
-        \"email\" varchar(256) NOT NULL,
-        \"phone_number\" varchar(20) NOT NULL,
-        \"password_hashed\" varchar(512) NOT NULL,
-        \"email_verification_token\" varchar(64) DEFAULT NULL,
-        \"is_verified\" smallint NOT NULL DEFAULT 0
-    );";
-      $result = pg_query($db, $query);
-      if($result){
-        echo "It works!";
-      }
-      else{
-        echo "it don' work :(";
-      }
-});
-
-Flight::route('/account', function(){
-    global $db;
-    $query = "SELECT * FROM account";
-    $result = pg_query($db, $query);
-    if($result){
-        echo "it worked";
-        return $result;
-    }
-    else{
-        echo "didnt work";
-    }
-});
-
-
-
 Flight::route('POST /registracija', function(){
     
     global $db;
@@ -70,26 +33,54 @@ Flight::route('POST /registracija', function(){
 
     // Check username requirements
     if (strlen($username) <= 3) {
-        Flight::json(['error' => 'Username must have more than 3 characters.']);
+        echo '<script>alert("Username must have more than 3 characters.")</script>';
+        include 'html/register.html';
         return;
     }
     if (!ctype_alnum($username)) {
-        Flight::json(['error' => 'Username should contain only alphanumeric characters.']);
+        echo '<script>alert("Username should contain only alphanumeric characters.")</script>';
+        include 'html/register.html';
         return;
     }
     $check_username_query = "SELECT * FROM account WHERE username='$username' LIMIT 1";
     $result_username = pg_query($db,$check_username_query);
 
     if (pg_num_rows($result_username) > 0) {
-        Flight::json(['error' => 'Username already exists. Choose a different username.']);
+        echo '<script>alert("Username already exists. Choose a different username.")</script>';
+        include 'html/register.html';
         return;
     }
     // Username requirements checked
 
 
+
+
+    //Check email requirements
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        echo '<script>alert("Invalid email format.")</script>';
+        include 'html/register.html';
+        return;
+    }
+
+    // Extract domain from email
+    $email_parts = explode('@', $email);
+    $domain = end($email_parts);
+
+    // Check MX records for the domain
+    if (!checkdnsrr($domain, 'MX')) {
+        echo '<script>alert("Invalid email domain.")</script>';
+        include 'html/register.html';
+        return;
+    }
+    // Email requirements checked
+
+
+
+
     // Check password requirements
     if (strlen($password) <= 8) {
-        Flight::json(['error' => 'Password must have more than 8 characters.']);
+        echo '<script>alert("Password must have more than 8 characters.")</script>';
+        include 'html/register.html';
         return;
     }
 
@@ -101,7 +92,8 @@ Flight::route('POST /registracija', function(){
     $api_response = file_get_contents($api_url);
 
     if (strpos($api_response, $suffix) !== false) {
-        Flight::json(['error' => 'Password is commonly used and insecure. Choose a stronger password.']);
+        echo '<script>alert("Password is commonly used and insecure. Choose a stronger password.")</script>';
+        include 'html/register.html';
         return;
     }
 
@@ -110,39 +102,45 @@ Flight::route('POST /registracija', function(){
 
 
 
-    //Check email requirements
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        Flight::json(['error' => 'Invalid email format.']);
+    //Check phone number requirements
+    // Check if phone number is unique
+    $check_phone_query = "SELECT * FROM account WHERE phone_number = '$phone_number'";
+    $result = pg_query($db, $check_phone_query);
+
+    if (pg_num_rows($result) > 0) {
+        echo '<script>alert("Phone number is already registered.")</script>';
+        include 'html/register.html';
         return;
     }
 
-    // Extract domain from email
-    $email_parts = explode('@', $email);
-    $domain = end($email_parts);
-
-    // Check MX records for the domain
-    if (!checkdnsrr($domain, 'MX')) {
-        Flight::json(['error' => 'Invalid email domain.']);
+    // Validate phone number using Google phone library
+    $phoneUtil = \libphonenumber\PhoneNumberUtil::getInstance();
+    try {
+        $phoneNumberProto = $phoneUtil->parse($phone_number, "US"); 
+        if (!$phoneUtil->isValidNumber($phoneNumberProto)) {
+            echo '<script>alert("Invalid phone number format.")</script>';
+            include 'html/register.html';
+        return;
+        }
+    } catch (\libphonenumber\NumberFormatException $e) {
+        echo '<script>alert("Invalid phone number format.")</script>';
+        include 'html/register.html';
         return;
     }
-    // Email requirements checked
+    //Phone number requirements checked
 
     $email_verification_token = bin2hex(random_bytes(32));
 
     // Send email
-
-        // WORK IN PROGRESS
         $mail = new PHPMailer(true);
-
-    
         //Server settings
-        $mail->SMTPDebug = 1; // Enable verbose debug output
+        $mail->SMTPDebug = 0;
         $mail->isSMTP();
         $mail->Host = Config::$SMTP_HOST;
         $mail->SMTPAuth = true;
         $mail->Username = Config::$SMTP_USERNAME; // Your Gmail username
         $mail->Password = Config::$SMTP_PASSWORD; // Your Gmail password
-        $mail->SMTPSecure = 'ssl'; // Enable TLS encryption, `ssl` also accep   ted
+        $mail->SMTPSecure = 'ssl'; // Enable TLS encryption, `ssl` also accepted
         $mail->Port = Config::$SMTP_PORT; // TCP port to connect to
         //Recipients
         $mail->setFrom('fedjapandzic1@gmail.com', 'Fedja Pandzic');
@@ -156,33 +154,6 @@ Flight::route('POST /registracija', function(){
         $mail->send();
         echo 'Message has been sent';
     
-    
-    
-
-    //Check phone number requirements
-    // Check if phone number is unique
-    $check_phone_query = "SELECT * FROM account WHERE phone_number = '$phone_number'";
-    $result = pg_query($db, $check_phone_query);
-
-    if (pg_num_rows($result) > 0) {
-        Flight::json(['error' => 'Phone number is already registered.']);
-        return;
-    }
-
-    // Validate phone number using Google phone library
-    $phoneUtil = \libphonenumber\PhoneNumberUtil::getInstance();
-    try {
-        $phoneNumberProto = $phoneUtil->parse($phone_number, "US"); 
-        if (!$phoneUtil->isValidNumber($phoneNumberProto)) {
-            Flight::json(['error' => 'Invalid phone number format.']);
-            return;
-        }
-    } catch (\libphonenumber\NumberFormatException $e) {
-        Flight::json(['error' => 'Invalid phone number format.']);
-        return;
-    }
-    //Phone number requirements checked
-
     $hashed_password = password_hash($password, PASSWORD_BCRYPT);
 
     
@@ -194,11 +165,11 @@ Flight::route('POST /registracija', function(){
     $result = pg_query($db, $insert_user_query);
 
     if ($result) {
-        echo '<script>alert("Check your email for verification purposes.")</script>';
-        Flight::redirect('/login');
+        Flight::redirect('/checkyouremail');
     } else {
     // Query failed, handle the error
-        Flight::json(['error' => 'Error inserting user ']);
+    echo '<script>alert("Error inserting user. Try again.")</script>';
+    include 'html/register.html';
     }
 
    
@@ -215,16 +186,18 @@ Flight::route('/verify/@EVT', function($EVT){
         Flight::redirect("/UserVerified");
     }
     else{
-        echo 'This link does not exist';
+        echo '<script>alert("This link does not exist.")</script>';
+        include 'html/register.html';
     }
 });
 
 Flight::route('/UserVerified', function(){
-    echo 'user is verified';
+    echo '<script>alert("You have been verified!")</script>';
+    include 'html/login.html';
 });
 
 Flight::route('/homeRoute', function(){
-    if(isset($_SESSION['full_name'])){
+    if(isset($_SESSION['full_name']) && $_SESSION['is_verified'] == 1){
         echo '<html lang="en">
         <head>
             <meta charset="UTF-8">
@@ -242,12 +215,16 @@ Flight::route('/homeRoute', function(){
         include 'html/home.html';
     }
     else {
-        echo '<p>No full name found. Could there be an error?</p>';
+        Flight::redirect('/login');
     }
 });
 
 Flight::route('/login', function(){
     include 'html/login.html';
+});
+
+Flight::route('/checkyouremail' , function(){
+    include 'html/checkverification.html';
 });
 
 Flight::route('/changePassword', function(){
@@ -270,7 +247,8 @@ Flight::route('POST /passwordChange', function(){
         $api_response = file_get_contents($api_url);
 
         if (strpos($api_response, $suffix) !== false) {
-            Flight::json(['error' => 'Password is commonly used and insecure. Choose a stronger password.']);
+            echo '<script>alert("Password is commonly used and insecure. Choose a stronger password.")</script>';
+            include 'html/changepass.html';
             return;
         }
         else{
@@ -279,7 +257,7 @@ Flight::route('POST /passwordChange', function(){
             pg_query($db, $change_pass_query);
             echo '<script>alert("Password successfully updated")</script>';
             sleep(3);
-            Flight::redirect('/login');
+            include 'html/login.html';
         }
     }
 });
@@ -295,8 +273,7 @@ Flight::route('/twofactorauthenticator', function(){
 });
 
 Flight::route('/logout', function(){
-    unset($_SESSION['phone_number']);
-    unset($_SESSION['full_name']);
+    session_unset();
     if(!isset($_SESSION['phone_number']) && !isset($_SESSION['full_name'])){
         Flight::redirect('/login');
     }
@@ -337,6 +314,7 @@ Flight::route('POST /submitCode', function(){
         Flight::redirect('/homeRoute');
     } else {
         echo '<script>alert("Incorrect code, try again!")</script>';
+        include 'html/twofactorauth.html';
     }
 
 });
@@ -348,7 +326,8 @@ Flight::route('POST /loginUser', function(){
 
     // Validate input (you may need to adjust this based on your login requirements)
     if (empty($username_or_email) || empty($password)) {
-        Flight::json(['error' => 'Username/email and password are required.']);
+        echo '<script>alert("Username/email and password are required.")</script>';
+        include 'html/login.html';
         return;
     }
 
@@ -360,7 +339,8 @@ Flight::route('POST /loginUser', function(){
     $result = pg_query($db, $fetch_user_query);
 
     if (pg_num_rows($result) === 0) {
-        Flight::json(['error' => 'Invalid username/email or password.']);
+        echo '<script>alert("Invalid username/email or password.")</script>';
+        include 'html/login.html';
         return;
     }
 
@@ -372,6 +352,7 @@ Flight::route('POST /loginUser', function(){
         $_SESSION['phone_number'] = $user['phone_number'];
         $_SESSION['full_name'] = $user['full_name'];
         $_SESSION['password'] = $user['password_hashed'];
+        $_SESSION['is_verified'] = $user['is_verified'];
         Flight::redirect('/twofactorauthenticator');
     } else {
         // Password is incorrect
@@ -382,8 +363,14 @@ Flight::route('POST /loginUser', function(){
 
 Flight::route('/delete', function(){
     global $db;
-    $query= "DELETE FROM account WHERE email='fedjap01@gmail.com'";
-    pg_query($db,$query);
+    $query= "DELETE FROM account WHERE uid=9";
+    $result = pg_query($db,$query);
+    if($result){
+        echo 'dobar';
+    }
+    else{
+        echo 'ne valja';
+    }
 });
 
 
