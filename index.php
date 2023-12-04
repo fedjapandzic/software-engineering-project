@@ -208,7 +208,7 @@ Flight::route('/homeRoute', function(){
         </head>
         <body>
         <div class="container">
-        <div class="row">
+        <div class="row" align="center">
         <div class="message-container">
         <h1>' . $_SESSION['full_name'] . ', you have successfully logged in, congrats!</h1>
     </div></div>';
@@ -363,7 +363,7 @@ Flight::route('POST /loginUser', function(){
 
 Flight::route('/delete', function(){
     global $db;
-    $query= "DELETE FROM account WHERE uid=9";
+    $query= "DELETE FROM account WHERE uid=10";
     $result = pg_query($db,$query);
     if($result){
         echo 'dobar';
