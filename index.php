@@ -5,7 +5,7 @@ require 'vendor/autoload.php';
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
-$dotenv = Dotenv\Dotenv::createImmutable(__DIR__,'etc/secrets/.env');
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
 $host = getenv('DB_HOST');
