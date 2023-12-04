@@ -2,7 +2,7 @@
 session_start();
 
 require 'vendor/autoload.php';
-require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/etc/secrets/config.php';
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
