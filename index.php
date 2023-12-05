@@ -283,6 +283,51 @@ Flight::route('/twofactorauthenticator', function(){
 
 });
 
+Flight::route('/forgotpassword',function(){
+    include 'html/forgotpassword.html';
+});
+
+Flight::route('POST /sendNewPass',function(){
+    global $db;
+    $email = Flight::request()->data->email;
+
+    $fetch_user_by_email_query = "SELECT * FROM account WHERE email = '$email' LIMIT 1";
+    $result = pg_query($db, $fetch_user_by_email_query);
+    if($result){
+        $mail = new PHPMailer(true);
+        $recovery_pass=bin2hex(random_bytes(5));
+
+        //Server settings
+        $mail->SMTPDebug = 0;
+        $mail->isSMTP();
+        $mail->Host = getenv('SMTP_HOST');
+        $mail->SMTPAuth = true;
+        $mail->Username = getenv('SMTP_USERNAME'); // Your Gmail username
+        $mail->Password = getenv('SMTP_PASSWORD'); // Your Gmail password
+        $mail->SMTPSecure = 'ssl'; // Enable TLS encryption, `ssl` also accepted
+        $mail->Port = getenv('SMTP_PORT'); // TCP port to connect to
+        //Recipients
+        $mail->setFrom('fedjapandzic1@gmail.com', 'Fedja Pandzic');
+        $mail->addAddress($email, $full_name);
+    
+        //Content
+        $mail->isHTML(true);
+        $mail->Subject = 'Recovery password for SSSD Project';
+        $mail->Body    = 'You requested a recovery password. This is your new password: <strong>' . $recovery_pass . '</strong> . <br>Please be sure to change the password as soon as you use it.';
+    
+        $mail->send();
+    
+        $hashed_password = password_hash($recovery_pass, PASSWORD_BCRYPT);
+
+        $change_pass_query = "UPDATE account SET password_hashed = '$hashed_password' WHERE email='$email'";
+        pg_query($db, $change_pass_query);
+        echo '<script>alert("Check your email for the new password")</script>';
+        include 'html/login';
+
+        
+    }
+});
+
 Flight::route('/logout', function(){
     session_unset();
     if(!isset($_SESSION['phone_number']) && !isset($_SESSION['full_name'])){
