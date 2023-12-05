@@ -369,18 +369,6 @@ Flight::route('POST /loginUser', function(){
     }
 });
 
-Flight::route('/delete', function(){
-    global $db;
-    $query= "DELETE FROM account WHERE uid=14";
-    $result = pg_query($db,$query);
-    if($result){
-        echo 'dobar';
-    }
-    else{
-        echo 'ne valja';
-    }
-});
-
 
 Flight::start();
 ?>
