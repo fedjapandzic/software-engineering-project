@@ -29,6 +29,10 @@ Flight::route('POST /registracija', function(){
     $phone_number = Flight::request()->data->phone_number;
     $password = Flight::request()->data->password;
 
+    $temp_full_name=$full_name;
+    $temp_username=$username;
+    $temp_email=$email;
+    $temp_phone_number=$phone_number;
 
 
     // Check username requirements
@@ -163,6 +167,10 @@ Flight::route('POST /registracija', function(){
                         VALUES ('$full_name', '$username', '$email', '$phone_number', '$hashed_password','$email_verification_token', 0)";
 
     $result = pg_query($db, $insert_user_query);
+    unset($temp_full_name);
+    unset($temp_username);
+    unset($temp_email);
+    unset($temp_phone_number);
 
     if ($result) {
         Flight::redirect('/checkyouremail');
@@ -363,7 +371,7 @@ Flight::route('POST /loginUser', function(){
 
 Flight::route('/delete', function(){
     global $db;
-    $query= "DELETE FROM account WHERE uid=10";
+    $query= "DELETE FROM account WHERE uid=14";
     $result = pg_query($db,$query);
     if($result){
         echo 'dobar';
