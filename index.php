@@ -324,7 +324,7 @@ Flight::route('POST /sendNewPass',function(){
         $change_pass_query = "UPDATE account SET password_hashed = '$hashed_password' WHERE email='$email'";
         pg_query($db, $change_pass_query);
         echo '<script>alert("Check your email for the new password")</script>';
-        include 'html/login';
+        include 'html/login.html';
 
         
     }
