@@ -289,6 +289,7 @@ Flight::route('/forgotpassword',function(){
 
 Flight::route('POST /sendNewPass',function(){
     global $db;
+    global $failed_attempts;
     $email = Flight::request()->data->email;
 
     $fetch_user_by_email_query = "SELECT * FROM account WHERE email = '$email' LIMIT 1";
