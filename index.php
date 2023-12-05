@@ -294,6 +294,8 @@ Flight::route('POST /sendNewPass',function(){
     $fetch_user_by_email_query = "SELECT * FROM account WHERE email = '$email' LIMIT 1";
     $result = pg_query($db, $fetch_user_by_email_query);
     if($result){
+        $full_name_query= "SELECT full_name FROM account WHERE email = '$email' LIMIT 1";
+        $full_name=pg_query($db, $fetch_user_by_email_query);
         $mail = new PHPMailer(true);
         $recovery_pass=bin2hex(random_bytes(5));
 
@@ -325,6 +327,12 @@ Flight::route('POST /sendNewPass',function(){
         include 'html/login';
 
         
+    }
+
+    else{
+        echo '<script>alert("Account with provided email address does not exist.")</script>';
+        include 'html/forgotpassword.html';
+
     }
 });
 
