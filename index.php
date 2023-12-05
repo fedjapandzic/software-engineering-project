@@ -203,6 +203,7 @@ Flight::route('/verify/@EVT', function($EVT){
 
 Flight::route('/UserVerified', function(){
     echo '<script>alert("You have been verified!")</script>';
+    global $failed_attempts;
     include 'html/login.html';
 });
 
@@ -244,6 +245,7 @@ Flight::route('/changePassword', function(){
 
 Flight::route('POST /passwordChange', function(){
     global $db;
+    global $failed_attempts;
     $old_pass = Flight::request()->data->old_password;
     $new_pass = Flight::request()->data->new_password;
     $repeat_pass = Flight::request()->data->repeat_new_password;
