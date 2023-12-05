@@ -331,6 +331,28 @@ Flight::route('POST /loginUser', function(){
     global $db;
     $username_or_email = Flight::request()->data->username_or_email;
     $password = Flight::request()->data->password;
+    $failed_attempts = isset($_SESSION['failed_attempts']) ? $_SESSION['failed_attempts'] : 0;
+
+    if ($failed_attempts >= 3) {
+        $data = array(
+            'secret' => getenv('CAPTCHA_SECRET'),
+            'response' => $_POST['h-captcha-response']
+        );
+        $verify = curl_init();
+        curl_setopt($verify, CURLOPT_URL, "https://hcaptcha.com/siteverify");
+        curl_setopt($verify, CURLOPT_POST, true);
+        curl_setopt($verify, CURLOPT_POSTFIELDS, http_build_query($data));
+        curl_setopt($verify, CURLOPT_RETURNTRANSFER, true);
+        $response = curl_exec($verify);
+        // var_dump($response);
+        $responseData = json_decode($response);
+        if($responseData->success) {
+            // your success code goes here
+        } 
+        else {
+        // return error to user; they did not pass
+        }
+    }
 
     // Validate input (you may need to adjust this based on your login requirements)
     if (empty($username_or_email) || empty($password)) {
@@ -361,9 +383,11 @@ Flight::route('POST /loginUser', function(){
         $_SESSION['full_name'] = $user['full_name'];
         $_SESSION['password'] = $user['password_hashed'];
         $_SESSION['is_verified'] = $user['is_verified'];
+        unset($_SESSION['failed_attempts']);
         Flight::redirect('/twofactorauthenticator');
     } else {
         // Password is incorrect
+        $_SESSION['failed_attempts'] = ++$failed_attempts;
         echo '<script>alert("Invalid password or user may not be verified. Please check your email for verification.")</script>';
         include 'html/login.html';
     }
