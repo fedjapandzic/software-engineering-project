@@ -358,6 +358,28 @@ Flight::route('POST /loginUser', function(){
 
     $user = pg_fetch_assoc($result);
 
+    if ($failed_attempts >= 3) {
+        // Check if the captcha is successfully completed
+        $captcha_response = Flight::request()->data['h-captcha-response'];
+        $captcha_data = array(
+            'secret' => getenv('CAPTCHA_SECRET'),
+            'response' => $captcha_response
+        );
+        $verify = curl_init();
+        curl_setopt($verify, CURLOPT_URL, "https://hcaptcha.com/siteverify");
+        curl_setopt($verify, CURLOPT_POST, true);
+        curl_setopt($verify, CURLOPT_POSTFIELDS, http_build_query($captcha_data));
+        curl_setopt($verify, CURLOPT_RETURNTRANSFER, true);
+        $captcha_result = curl_exec($verify);
+        $captcha_response_data = json_decode($captcha_result);
+
+        if (!$captcha_response_data->success) {
+            echo '<script>alert("Captcha verification failed.")</script>';
+            include 'html/login.html';
+            return;
+        }
+    }
+
     // Verify the password
     if (password_verify($password, $user['password_hashed']) && $user['is_verified']==1) {
         // Password is correct, log in the user
