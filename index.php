@@ -334,25 +334,10 @@ Flight::route('POST /loginUser', function(){
     $failed_attempts = isset($_SESSION['failed_attempts']) ? $_SESSION['failed_attempts'] : 0;
 
     if ($failed_attempts >= 3) {
-        include 'html/captchapage.html';
-        $data = array(
-            'secret' => getenv('CAPTCHA_SECRET'),
-            'response' => $_POST['h-captcha-response']
-        );
-        $verify = curl_init();
-        curl_setopt($verify, CURLOPT_URL, "https://hcaptcha.com/siteverify");
-        curl_setopt($verify, CURLOPT_POST, true);
-        curl_setopt($verify, CURLOPT_POSTFIELDS, http_build_query($data));
-        curl_setopt($verify, CURLOPT_RETURNTRANSFER, true);
-        $response = curl_exec($verify);
-        // var_dump($response);
-        $responseData = json_decode($response);
-        if($responseData->success) {
-            Flight::redirect('/login');
-        } 
-        else {
-            echo '<script>alert("captcha incorrect")</script>';
-        }
+        // Show captcha
+        include 'html/login.html';
+        echo '<script>alert("Please complete the captcha.")</script>';
+        return;
     }
 
     // Validate input (you may need to adjust this based on your login requirements)
@@ -389,10 +374,19 @@ Flight::route('POST /loginUser', function(){
     } else {
         // Password is incorrect
         $_SESSION['failed_attempts'] = ++$failed_attempts;
+
+        // If failed attempts exceed the limit, show captcha
+        if ($failed_attempts >= 3) {
+            include 'html/login.html';
+            echo '<script>alert("Please complete the captcha.")</script>';
+            return;
+        }
+
         echo '<script>alert("Invalid password or user may not be verified. Please check your email for verification.")</script>';
         include 'html/login.html';
     }
 });
+
 
 
 Flight::start();
