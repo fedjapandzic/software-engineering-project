@@ -334,6 +334,7 @@ Flight::route('POST /loginUser', function(){
     $failed_attempts = isset($_SESSION['failed_attempts']) ? $_SESSION['failed_attempts'] : 0;
 
     if ($failed_attempts >= 3) {
+        include 'html/captchapage.html';
         $data = array(
             'secret' => getenv('CAPTCHA_SECRET'),
             'response' => $_POST['h-captcha-response']
@@ -347,10 +348,10 @@ Flight::route('POST /loginUser', function(){
         // var_dump($response);
         $responseData = json_decode($response);
         if($responseData->success) {
-            // your success code goes here
+            Flight::redirect('/login');
         } 
         else {
-        // return error to user; they did not pass
+            echo '<script>alert("captcha incorrect")</script>';
         }
     }
 
