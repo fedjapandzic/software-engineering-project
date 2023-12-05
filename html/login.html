@@ -16,7 +16,7 @@
     <form action="/loginUser" method="post">
 
         <p class="note"><i>Be sure that your account is activated. Check your mail if you haven't activated it yet!</i></p>
-        <?php echo $ ?> <div class="h-captcha" data-sitekey="<?php echo getenv('CAPTCHA_SITE_KEY'); ?>"></div>
+        <div class="h-captcha" data-sitekey="<?php echo getenv('CAPTCHA_SITE_KEY'); ?>"></div>
         <div class="form-group row">
             <label for="username_or_email_" class="col-sm-4 col-form-label">Username/Email:</label>
             <div class="col-sm-8">
