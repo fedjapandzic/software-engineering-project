@@ -12,6 +12,8 @@ $user = getenv('DB_USERNAME');
 $password = getenv('DB_PASSWORD');
 $port = getenv('DB_PORT');
 $dbname = getenv('DB_NAME');
+$failed_attempts = isset($_SESSION['failed_attempts']) ? $_SESSION['failed_attempts'] : 0;
+
 
 $db=pg_connect("host=$host port=$port dbname=$dbname user=$user password=$password");
 
@@ -331,7 +333,7 @@ Flight::route('POST /loginUser', function(){
     global $db;
     $username_or_email = Flight::request()->data->username_or_email;
     $password = Flight::request()->data->password;
-    $failed_attempts = isset($_SESSION['failed_attempts']) ? $_SESSION['failed_attempts'] : 0;
+    global $failed_attempts;
 
     // Validate input (you may need to adjust this based on your login requirements)
     if (empty($username_or_email) || empty($password)) {
