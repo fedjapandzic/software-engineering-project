@@ -333,13 +333,6 @@ Flight::route('POST /loginUser', function(){
     $password = Flight::request()->data->password;
     $failed_attempts = isset($_SESSION['failed_attempts']) ? $_SESSION['failed_attempts'] : 0;
 
-    if ($failed_attempts >= 3) {
-        // Show captcha
-        include 'html/login.html';
-        echo '<script>alert("Please complete the captcha.")</script>';
-        return;
-    }
-
     // Validate input (you may need to adjust this based on your login requirements)
     if (empty($username_or_email) || empty($password)) {
         echo '<script>alert("Username/email and password are required.")</script>';
@@ -386,6 +379,7 @@ Flight::route('POST /loginUser', function(){
         include 'html/login.html';
     }
 });
+
 
 
 
