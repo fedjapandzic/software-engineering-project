@@ -230,6 +230,7 @@ Flight::route('/homeRoute', function(){
 });
 
 Flight::route('/login', function(){
+    global $failed_attempts;
     include 'html/login.html';
 });
 
