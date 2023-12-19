@@ -56,6 +56,7 @@ Flight::route('POST /registracija', function(){
         include 'html/register.html';
         return;
     }
+    
     // Username requirements checked
 
 
