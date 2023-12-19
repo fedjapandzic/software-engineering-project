@@ -56,7 +56,7 @@ Flight::route('POST /registracija', function(){
         include 'html/register.html';
         return;
     }
-    
+
     // Username requirements checked
 
 
@@ -210,20 +210,6 @@ Flight::route('/UserVerified', function(){
 
 Flight::route('/homeRoute', function(){
     if(isset($_SESSION['full_name']) && $_SESSION['is_verified'] == 1){
-        echo '<html lang="en">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Home Page</title>
-            <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-            <link rel="stylesheet" href="css/home.css">
-        </head>
-        <body>
-        <div class="container">
-        <div class="row" align="center">
-        <div class="message-container">
-        <h1>' . $_SESSION['full_name'] . ', you have successfully logged in, congrats!</h1>
-    </div></div>';
         include 'html/home.html';
     }
     else {
