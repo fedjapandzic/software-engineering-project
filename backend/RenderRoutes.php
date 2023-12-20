@@ -1,5 +1,5 @@
 <?php
-include '../index.php';
+include './index.php';
 
 
 Flight::route('/', function(){
