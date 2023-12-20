@@ -22,6 +22,7 @@ Flight::route('POST /registracija', function(){
     $email = Flight::request()->data->email;
     $phone_number = Flight::request()->data->phone_number;
     $password = Flight::request()->data->password;
+    $repeat_password = Flight::request()->data->repeat_password;
 
     $temp_full_name=$full_name;
     $temp_username=$username;
@@ -79,6 +80,12 @@ Flight::route('POST /registracija', function(){
     // Check password requirements
     if (strlen($password) <= 8) {
         echo '<script>alert("Password must have more than 8 characters.")</script>';
+        include './html/register.html';
+        return;
+    }
+
+    if($password != $repeat_password){
+        echo '<script>alert("Repeated password does not match.")</script>';
         include './html/register.html';
         return;
     }
