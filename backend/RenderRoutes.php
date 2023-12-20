@@ -3,7 +3,7 @@ include '../index.php';
 
 
 Flight::route('/', function(){
-    include '../html/register.html';
+    include './html/register.html';
 });
 
 Flight::route('/homeRoute', function(){
