@@ -19,7 +19,7 @@ $db=pg_connect("host=$host port=$port dbname=$dbname user=$user password=$passwo
 
 
 Flight::route('/', function(){
-    include 'html/register.html';
+    include '../html/register.html';
 });
 
 Flight::route('POST /registracija', function(){
@@ -40,12 +40,12 @@ Flight::route('POST /registracija', function(){
     // Check username requirements
     if (strlen($username) <= 3) {
         echo '<script>alert("Username must have more than 3 characters.")</script>';
-        include 'html/register.html';
+        include '../html/register.html';
         return;
     }
     if (!ctype_alnum($username)) {
         echo '<script>alert("Username should contain only alphanumeric characters.")</script>';
-        include 'html/register.html';
+        include '../html/register.html';
         return;
     }
     $check_username_query = "SELECT * FROM account WHERE username='$username' LIMIT 1";
@@ -53,7 +53,7 @@ Flight::route('POST /registracija', function(){
 
     if (pg_num_rows($result_username) > 0) {
         echo '<script>alert("Username already exists. Choose a different username.")</script>';
-        include 'html/register.html';
+        include '../html/register.html';
         return;
     }
 
@@ -65,7 +65,7 @@ Flight::route('POST /registracija', function(){
     //Check email requirements
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         echo '<script>alert("Invalid email format.")</script>';
-        include 'html/register.html';
+        include '../html/register.html';
         return;
     }
 
@@ -76,7 +76,7 @@ Flight::route('POST /registracija', function(){
     // Check MX records for the domain
     if (!checkdnsrr($domain, 'MX')) {
         echo '<script>alert("Invalid email domain.")</script>';
-        include 'html/register.html';
+        include '../html/register.html';
         return;
     }
     // Email requirements checked
@@ -87,7 +87,7 @@ Flight::route('POST /registracija', function(){
     // Check password requirements
     if (strlen($password) <= 8) {
         echo '<script>alert("Password must have more than 8 characters.")</script>';
-        include 'html/register.html';
+        include '../html/register.html';
         return;
     }
 
@@ -100,7 +100,7 @@ Flight::route('POST /registracija', function(){
 
     if (strpos($api_response, $suffix) !== false) {
         echo '<script>alert("Password is commonly used and insecure. Choose a stronger password.")</script>';
-        include 'html/register.html';
+        include '../html/register.html';
         return;
     }
 
@@ -116,7 +116,7 @@ Flight::route('POST /registracija', function(){
 
     if (pg_num_rows($result) > 0) {
         echo '<script>alert("Phone number is already registered.")</script>';
-        include 'html/register.html';
+        include '../html/register.html';
         return;
     }
 
@@ -126,12 +126,12 @@ Flight::route('POST /registracija', function(){
         $phoneNumberProto = $phoneUtil->parse($phone_number, "US"); 
         if (!$phoneUtil->isValidNumber($phoneNumberProto)) {
             echo '<script>alert("Invalid phone number format.")</script>';
-            include 'html/register.html';
+            include '../html/register.html';
         return;
         }
     } catch (\libphonenumber\NumberFormatException $e) {
         echo '<script>alert("Invalid phone number format.")</script>';
-        include 'html/register.html';
+        include '../html/register.html';
         return;
     }
     //Phone number requirements checked
@@ -180,7 +180,7 @@ Flight::route('POST /registracija', function(){
     } else {
     // Query failed, handle the error
     echo '<script>alert("Error inserting user. Try again.")</script>';
-    include 'html/register.html';
+    include '../html/register.html';
     }
 
    
@@ -198,19 +198,19 @@ Flight::route('/verify/@EVT', function($EVT){
     }
     else{
         echo '<script>alert("This link does not exist.")</script>';
-        include 'html/register.html';
+        include '../html/register.html';
     }
 });
 
 Flight::route('/UserVerified', function(){
     echo '<script>alert("You have been verified!")</script>';
     global $failed_attempts;
-    include 'html/login.html';
+    include '../html/login.html';
 });
 
 Flight::route('/homeRoute', function(){
     if(isset($_SESSION['full_name']) && $_SESSION['is_verified'] == 1){
-        include 'html/home.html';
+        include '../html/home.html';
     }
     else {
         Flight::redirect('/login');
@@ -219,15 +219,15 @@ Flight::route('/homeRoute', function(){
 
 Flight::route('/login', function(){
     global $failed_attempts;
-    include 'html/login.html';
+    include '../html/login.html';
 });
 
 Flight::route('/checkyouremail' , function(){
-    include 'html/checkverification.html';
+    include '../html/checkverification.html';
 });
 
 Flight::route('/changePassword', function(){
-    include 'html/changepass.html';
+    include '../html/changepass.html';
 });
 
 Flight::route('POST /passwordChange', function(){
@@ -248,7 +248,7 @@ Flight::route('POST /passwordChange', function(){
 
         if (strpos($api_response, $suffix) !== false) {
             echo '<script>alert("Password is commonly used and insecure. Choose a stronger password.")</script>';
-            include 'html/changepass.html';
+            include '../html/changepass.html';
             return;
         }
         else{
@@ -257,14 +257,14 @@ Flight::route('POST /passwordChange', function(){
             pg_query($db, $change_pass_query);
             echo '<script>alert("Password successfully updated")</script>';
             sleep(3);
-            include 'html/login.html';
+            include '../html/login.html';
         }
     }
 });
 
 Flight::route('/twofactorauthenticator', function(){
     if (isset($_SESSION['phone_number'])) {
-        include 'html/twofactorauth.html';
+        include '../html/twofactorauth.html';
     } else {
         // Redirect to login or handle the case where phone_number is not set.
         Flight::redirect('/login');
@@ -273,7 +273,7 @@ Flight::route('/twofactorauthenticator', function(){
 });
 
 Flight::route('/forgotpassword',function(){
-    include 'html/forgotpassword.html';
+    include '../html/forgotpassword.html';
 });
 
 Flight::route('POST /sendNewPass',function(){
@@ -314,14 +314,14 @@ Flight::route('POST /sendNewPass',function(){
         $change_pass_query = "UPDATE account SET password_hashed = '$hashed_password' WHERE email='$email'";
         pg_query($db, $change_pass_query);
         echo '<script>alert("Check your email for the new password")</script>';
-        include 'html/login.html';
+        include '../html/login.html';
 
         
     }
 
     else{
         echo '<script>alert("Account with provided email address does not exist.")</script>';
-        include 'html/forgotpassword.html';
+        include '../html/forgotpassword.html';
 
     }
 });
@@ -368,7 +368,7 @@ Flight::route('POST /submitCode', function(){
         Flight::redirect('/homeRoute');
     } else {
         echo '<script>alert("Incorrect code, try again!")</script>';
-        include 'html/twofactorauth.html';
+        include '../html/twofactorauth.html';
     }
 
 });
@@ -382,7 +382,7 @@ Flight::route('POST /loginUser', function(){
     // Validate input (you may need to adjust this based on your login requirements)
     if (empty($username_or_email) || empty($password)) {
         echo '<script>alert("Username/email and password are required.")</script>';
-        include 'html/login.html';
+        include '../html/login.html';
         return;
     }
 
@@ -395,7 +395,7 @@ Flight::route('POST /loginUser', function(){
 
     if (pg_num_rows($result) === 0) {
         echo '<script>alert("Invalid username/email or password.")</script>';
-        include 'html/login.html';
+        include '../html/login.html';
         return;
     }
 
@@ -418,7 +418,7 @@ Flight::route('POST /loginUser', function(){
 
         if (!$captcha_response_data->success) {
             echo '<script>alert("Captcha verification failed.")</script>';
-            include 'html/login.html';
+            include '../html/login.html';
             return;
         }
     }
@@ -438,13 +438,13 @@ Flight::route('POST /loginUser', function(){
 
         // If failed attempts exceed the limit, show captcha
         if ($failed_attempts >= 3) {
-            include 'html/login.html';
+            include '../html/login.html';
             echo '<script>alert("Please complete the captcha.")</script>';
             return;
         }
 
         echo '<script>alert("Invalid password or user may not be verified. Please check your email for verification.")</script>';
-        include 'html/login.html';
+        include '../html/login.html';
     }
 });
 
