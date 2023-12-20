@@ -6,5 +6,4 @@ require './vendor/autoload.php';
 include 'backend/RenderRoutes.php';
 include 'backend/UserAuthenticationRoutes.php';
 
-Flight::start();
 ?>
