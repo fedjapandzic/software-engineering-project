@@ -391,4 +391,7 @@ Flight::route('POST /loginUser', function(){
         include './html/login.html';
     }
 });
+
+Flight::start();
+
 ?>
