@@ -20,7 +20,7 @@ Flight::route('GET /pets' , function(){
 
 Flight::route('/login', function(){
     global $failed_attempts;
-    include 'html/login.html';
+    include './html/login.html';
 });
 
 Flight::route('/checkyouremail' , function(){
