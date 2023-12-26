@@ -9,11 +9,11 @@ class BaseDao
     public function __construct($table_name)
     {
         $this->table_name = $table_name;
-        $host = 'dpg-clmcm49fb9qs739bha90-a.frankfurt-postgres.render.com';
-        $user = 'root';
-        $password = 'btIhWIuejAwjzdpGeSPaM4DPgqPspZ5T';
-        $port = '5432';
-        $dbname = 'sssd';
+        $host = getenv('DB_HOST');
+        $user = getenv('DB_USERNAME');
+        $password = getenv('DB_PASSWORD');
+        $port = getenv('DB_PORT');
+        $dbname = getenv('DB_NAME');
 
         // Create PostgreSQL connection
         $this->conn = pg_connect("host=$host port=$port dbname=$dbname user=$user password=$password");

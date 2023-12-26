@@ -5,11 +5,11 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
 
-$host = 'dpg-clmcm49fb9qs739bha90-a.frankfurt-postgres.render.com';
-$user = 'root';
-$password = 'btIhWIuejAwjzdpGeSPaM4DPgqPspZ5T';
-$port = '5432';
-$dbname = 'sssd';
+$host = getenv('DB_HOST');
+$user = getenv('DB_USERNAME');
+$password = getenv('DB_PASSWORD');
+$port = getenv('DB_PORT');
+$dbname = getenv('DB_NAME');
 $failed_attempts = isset($_SESSION['failed_attempts']) ? $_SESSION['failed_attempts'] : 0;
 
 $db=pg_connect("host=$host port=$port dbname=$dbname user=$user password=$password");
@@ -142,12 +142,12 @@ Flight::route('POST /registracija', function(){
         //Server settings
         $mail->SMTPDebug = 0;
         $mail->isSMTP();
-        $mail->Host = 'smtp.gmail.com';
+        $mail->Host = getenv('SMTP_HOST');
         $mail->SMTPAuth = true;
-        $mail->Username = 'fedjapandzic1@gmail.com'; // Your Gmail username
-        $mail->Password = 'quxu ussv kuaa nclg'; // Your Gmail password
+        $mail->Username = getenv('SMTP_USERNAME'); // Your Gmail username
+        $mail->Password = getenv('SMTP_PASSWORD'); // Your Gmail password
         $mail->SMTPSecure = 'ssl'; // Enable TLS encryption, `ssl` also accepted
-        $mail->Port = 465; // TCP port to connect to
+        $mail->Port = getenv('SMTP_PORT'); // TCP port to connect to
         //Recipients
         $mail->setFrom('fedjapandzic1@gmail.com', 'Fedja Pandzic');
         $mail->addAddress($email, $full_name);
@@ -155,7 +155,7 @@ Flight::route('POST /registracija', function(){
         //Content
         $mail->isHTML(true);
         $mail->Subject = 'Verification link for SSSD Project';
-        $mail->Body    = 'Thank you for registering! Please click on the link to verify your email: <a href=' . "http://localhost/software-engineering-project/verify/$email_verification_token" . '>Verify Email</a>';
+        $mail->Body    = 'Thank you for registering! Please click on the link to verify your email: <a href=' . "http://sssd-project.onrender.com/verify/$email_verification_token" . '>Verify Email</a>';
     
         $mail->send();
         echo 'Message has been sent';
@@ -255,12 +255,12 @@ Flight::route('POST /sendNewPass',function(){
         //Server settings
         $mail->SMTPDebug = 0;
         $mail->isSMTP();
-        $mail->Host = 'smtp.gmail.com';
+        $mail->Host = getenv('SMTP_HOST');
         $mail->SMTPAuth = true;
-        $mail->Username = 'fedjapandzic1@gmail.com'; // Your Gmail username
-        $mail->Password = 'quxu ussv kuaa nclg'; // Your Gmail password
+        $mail->Username = getenv('SMTP_USERNAME'); // Your Gmail username
+        $mail->Password = getenv('SMTP_PASSWORD'); // Your Gmail password
         $mail->SMTPSecure = 'ssl'; // Enable TLS encryption, `ssl` also accepted
-        $mail->Port = 465; // TCP port to connect to
+        $mail->Port = getenv('SMTP_PORT'); // TCP port to connect to
         //Recipients
         $mail->setFrom('fedjapandzic1@gmail.com', 'Fedja Pandzic');
         $mail->addAddress($email, $full_name);
@@ -290,37 +290,37 @@ Flight::route('POST /sendNewPass',function(){
 });
 
 Flight::route('POST /sendSMSCode', function(){
-    $code = 1234;
-    // $code = str_pad(rand(0, pow(10, 4)-1), 4, '0', STR_PAD_LEFT);
+    $code = str_pad(rand(0, pow(10, 4)-1), 4, '0', STR_PAD_LEFT);
+    $_SESSION['code']=$code;
     $phone = $_SESSION['phone_number'];
-    // $ch = curl_init();
+    $ch = curl_init();
 
-    // curl_setopt($ch, CURLOPT_URL, "https://rest.nexmo.com/sms/json");
-    // curl_setopt($ch, CURLOPT_POST, 1);
-    // curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query(array(
-    //     'from' => 'Vonage APIs',
-    //     'text' => "Your code: $code",
-    //     'to' => "$phone",
-    //     'api_key' => getenv('NEXMO_API_KEY'),
-    //     'api_secret' => getenv('NEXMO_API_SECRET')
-    // )));
+    curl_setopt($ch, CURLOPT_URL, "https://rest.nexmo.com/sms/json");
+    curl_setopt($ch, CURLOPT_POST, 1);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query(array(
+        'from' => 'Vonage APIs',
+        'text' => "Your code: $code",
+        'to' => "$phone",
+        'api_key' => getenv('NEXMO_API_KEY'),
+        'api_secret' => getenv('NEXMO_API_SECRET')
+    )));
 
-    // $result = curl_exec($ch);
+    $result = curl_exec($ch);
 
-    // if (curl_errno($ch)) {
-    //     echo 'cURL error: ' . curl_error($ch);
-    // }
+    if (curl_errno($ch)) {
+        echo 'cURL error: ' . curl_error($ch);
+    }
 
-    // curl_close($ch);
+    curl_close($ch);
 
-    // echo $result;
+    echo $result;
     Flight::redirect('/twofactorauthenticator');
 });
 
 Flight::route('POST /submitCode', function(){
 
     $submited_code = Flight::request()->data->code_input;
-    if($submited_code == 1234){
+    if($submited_code == $_SESSION['code']){
         Flight::redirect('/homeRoute');
     } else {
         echo '<script>alert("Incorrect code, try again!")</script>';
@@ -361,7 +361,7 @@ Flight::route('POST /loginUser', function(){
         // Check if the captcha is successfully completed
         $captcha_response = Flight::request()->data['h-captcha-response'];
         $captcha_data = array(
-            'secret' => "ES_635fb05463b246e081d63cbac585606c",
+            'secret' => getenv('CAPTCHA_SECRET'),
             'response' => $captcha_response
         );
         $verify = curl_init();

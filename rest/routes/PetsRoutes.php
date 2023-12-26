@@ -28,10 +28,4 @@ Flight::route('DELETE /pets/@id' , function($id){
     Flight::json(["message" => "deleted"]);
 });
 
-// Flight::route('GET /addToCart', function(){
-//     echo 'nice';
-//     // $pet_name = Flight::request()->data->pet_name;
-//     // $cart_id = $_SESSION['cart_id'];
-//     // Flight::petsService()->addPetToCart($pet_name,$cart_id);
-// });
 ?>

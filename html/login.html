@@ -13,12 +13,12 @@
 <body>
 
     <h2>Login</h2>
-    <form action="/software-engineering-project/loginUser" method="post">
+    <form action="/loginUser" method="post">
 
         <p class="note"><i>Be sure that your account is activated. Check your mail if you haven't activated it yet!</i></p>
         
         <?php if ($failed_attempts >= 3): ?>
-        <div class="h-captcha" data-sitekey="b2a219ca-ff5d-4d99-bfb6-1ccf682eb03d"></div>
+        <div class="h-captcha" data-sitekey="<?php echo getenv('CAPTCHA_SITE_KEY'); ?>"></div>
         <?php endif; ?>
 
 
@@ -43,10 +43,10 @@
         </div>
     </form>
     <div>
-        <p style="text-align: center;font-size: 11px;"><i><a href="http://localhost/software-engineering-project/forgotpassword">Forgot password?</a></i></p>
+        <p style="text-align: center;font-size: 11px;"><i><a href="https://sssd-project.onrender.com/forgotpassword">Forgot password?</a></i></p>
     </div>
     <div>
-        <p style="text-align: center;"><i>Don't have an account? <a href="http://localhost/software-engineering-project/"><b>Register here</b></a> </i></p>
+        <p style="text-align: center;"><i>Don't have an account? <a href="https://sssd-project.onrender.com"><b>Register here</b></a> </i></p>
     </div>
     
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>

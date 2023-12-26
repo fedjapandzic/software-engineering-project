@@ -46,7 +46,7 @@
         $(document).ready(function () {
             // AJAX call to fetch pets
             $.ajax({
-                url: 'http://localhost/software-engineering-project/pets',
+                url: 'https://sssd-project.onrender.com/pets',
                 method: 'GET',
                 dataType: 'json',
                 success: function (data) {
@@ -57,7 +57,7 @@
                             var cardHtml = `
                             
                             <div class="col-md-3" style="margin-bottom: 5px;">
-                                <form action="/software-engineering-project/addToCart" method="post">
+                                <form action="/addToCart" method="post">
                             <div class="card">
                                 <div class="card-body">
                                     <div class="row">
