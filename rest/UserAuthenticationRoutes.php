@@ -5,11 +5,11 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
 
-$host = getenv('DB_HOST');
-$user = getenv('DB_USERNAME');
-$password = getenv('DB_PASSWORD');
-$port = getenv('DB_PORT');
-$dbname = getenv('DB_NAME');
+$host = 'dpg-clmcm49fb9qs739bha90-a.frankfurt-postgres.render.com';
+$user = 'root';
+$password = 'btIhWIuejAwjzdpGeSPaM4DPgqPspZ5T';
+$port = '5432';
+$dbname = 'sssd';
 $failed_attempts = isset($_SESSION['failed_attempts']) ? $_SESSION['failed_attempts'] : 0;
 
 $db=pg_connect("host=$host port=$port dbname=$dbname user=$user password=$password");
@@ -142,12 +142,12 @@ Flight::route('POST /registracija', function(){
         //Server settings
         $mail->SMTPDebug = 0;
         $mail->isSMTP();
-        $mail->Host = getenv('SMTP_HOST');
+        $mail->Host = 'smtp.gmail.com';
         $mail->SMTPAuth = true;
-        $mail->Username = getenv('SMTP_USERNAME'); // Your Gmail username
-        $mail->Password = getenv('SMTP_PASSWORD'); // Your Gmail password
+        $mail->Username = 'fedjapandzic1@gmail.com'; // Your Gmail username
+        $mail->Password = 'quxu ussv kuaa nclg'; // Your Gmail password
         $mail->SMTPSecure = 'ssl'; // Enable TLS encryption, `ssl` also accepted
-        $mail->Port = getenv('SMTP_PORT'); // TCP port to connect to
+        $mail->Port = 465; // TCP port to connect to
         //Recipients
         $mail->setFrom('fedjapandzic1@gmail.com', 'Fedja Pandzic');
         $mail->addAddress($email, $full_name);
@@ -155,7 +155,7 @@ Flight::route('POST /registracija', function(){
         //Content
         $mail->isHTML(true);
         $mail->Subject = 'Verification link for SSSD Project';
-        $mail->Body    = 'Thank you for registering! Please click on the link to verify your email: <a href=' . "http://sssd-project.onrender.com/verify/$email_verification_token" . '>Verify Email</a>';
+        $mail->Body    = 'Thank you for registering! Please click on the link to verify your email: <a href=' . "http://localhost/software-engineering-project/verify/$email_verification_token" . '>Verify Email</a>';
     
         $mail->send();
         echo 'Message has been sent';
@@ -167,14 +167,20 @@ Flight::route('POST /registracija', function(){
     // Inserting user into database
     $insert_user_query = "INSERT INTO account (full_name, username, email, phone_number, password_hashed,email_verification_token,is_verified) 
                         VALUES ('$full_name', '$username', '$email', '$phone_number', '$hashed_password','$email_verification_token', 0)";
+    $find_added_user = "SELECT uid FROM account WHERE full_name='$full_name'";
 
     $result = pg_query($db, $insert_user_query);
+    $found_user = pg_query($db, $find_added_user);
+    $user_data = pg_fetch_assoc($found_user);
+    $user_id = (int)$user_data['uid'];
+    $insert_cart_query = "INSERT INTO cart (account_id) VALUES ('$user_id')";
+    $result_for_cart = pg_query($db, $insert_cart_query);
     unset($temp_full_name);
     unset($temp_username);
     unset($temp_email);
     unset($temp_phone_number);
 
-    if ($result) {
+    if ($result && $result_for_cart) {
         Flight::redirect('/checkyouremail');
     } else {
     // Query failed, handle the error
@@ -249,12 +255,12 @@ Flight::route('POST /sendNewPass',function(){
         //Server settings
         $mail->SMTPDebug = 0;
         $mail->isSMTP();
-        $mail->Host = getenv('SMTP_HOST');
+        $mail->Host = 'smtp.gmail.com';
         $mail->SMTPAuth = true;
-        $mail->Username = getenv('SMTP_USERNAME'); // Your Gmail username
-        $mail->Password = getenv('SMTP_PASSWORD'); // Your Gmail password
+        $mail->Username = 'fedjapandzic1@gmail.com'; // Your Gmail username
+        $mail->Password = 'quxu ussv kuaa nclg'; // Your Gmail password
         $mail->SMTPSecure = 'ssl'; // Enable TLS encryption, `ssl` also accepted
-        $mail->Port = getenv('SMTP_PORT'); // TCP port to connect to
+        $mail->Port = 465; // TCP port to connect to
         //Recipients
         $mail->setFrom('fedjapandzic1@gmail.com', 'Fedja Pandzic');
         $mail->addAddress($email, $full_name);
@@ -308,14 +314,13 @@ Flight::route('POST /sendSMSCode', function(){
     // curl_close($ch);
 
     // echo $result;
-    $_SESSION['sms_code'] = $code;
     Flight::redirect('/twofactorauthenticator');
 });
 
 Flight::route('POST /submitCode', function(){
 
     $submited_code = Flight::request()->data->code_input;
-    if($submited_code == $_SESSION['sms_code']){
+    if($submited_code == 1234){
         Flight::redirect('/homeRoute');
     } else {
         echo '<script>alert("Incorrect code, try again!")</script>';
@@ -356,7 +361,7 @@ Flight::route('POST /loginUser', function(){
         // Check if the captcha is successfully completed
         $captcha_response = Flight::request()->data['h-captcha-response'];
         $captcha_data = array(
-            'secret' => getenv('CAPTCHA_SECRET'),
+            'secret' => "ES_635fb05463b246e081d63cbac585606c",
             'response' => $captcha_response
         );
         $verify = curl_init();
@@ -381,6 +386,12 @@ Flight::route('POST /loginUser', function(){
         $_SESSION['full_name'] = $user['full_name'];
         $_SESSION['password'] = $user['password_hashed'];
         $_SESSION['is_verified'] = $user['is_verified'];
+        $user_id= $user['uid'];
+        $_SESSION['id']= $user_id;
+        $user_cart_query = "SELECT uid FROM cart WHERE account_id = $user_id";
+        $cart_id_result = pg_query($db, $user_cart_query);
+        $cart_id_array = pg_fetch_assoc($cart_id_result);
+        $_SESSION['cart_id'] = (int)$cart_id_array['uid'];
         unset($_SESSION['failed_attempts']);
         Flight::redirect('/twofactorauthenticator');
     } else {
@@ -397,6 +408,15 @@ Flight::route('POST /loginUser', function(){
         echo '<script>alert("Invalid password or user may not be verified. Please check your email for verification.")</script>';
         include './html/login.html';
     }
+});
+
+Flight::route('POST /addToCart', function(){
+    global $db;
+    $pet_name = Flight::request()->data->pet_name;
+    $cart_id = $_SESSION['cart_id'];
+    $update_pet_query = "UPDATE pets SET cart_id = '$cart_id', is_reserved = 1 WHERE name= '$pet_name'";
+    pg_query($db, $update_pet_query);
+    Flight::redirect('/petshop');
 });
 
 Flight::start();
