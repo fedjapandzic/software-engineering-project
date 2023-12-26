@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pet Shop</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="./css/homepage.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Pet Shop</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Profile</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Log out</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="navbar-text">
+                <button class="btn btn-outline-primary" type="button">Cart</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row" id="PetCardContainer">
+            <!-- Pet card loads into here -->
+        </div>
+    </div>
+
+    <script>
+        
+        $(document).ready(function () {
+            // AJAX call to fetch pets
+            $.ajax({
+                url: 'https://sssd-project.onrender.com/pets',
+                method: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    // Process the data and create doctor cards
+                    if (data && data.length > 0) {
+                        data.forEach(function (pet) {
+                            // Dynamically create a card for each doctor
+                            var cardHtml = `
+                            
+                            <div class="col-md-3" style="margin-bottom: 5px;">
+                                <form action="/addToCart" method="post">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <img src="${pet.image_link}" alt="this is an image" style="object-fit: cover; width: 100%; height: 200px; ${pet.is_reserved === '1' ? 'filter: grayscale(100%);' : ''}">
+                                    </div>
+                                    <div class="row" align="center" style="margin-top: 10px;">
+                                        <div class="col-md-6">
+                                            <h5>Pet name: ${pet.name}</h5>
+                                            <input type="hidden" name="pet_name" value="${pet.name}">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <p>Pet price: $ ${pet.price}</p>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm" align="center">
+                                            <button type="submit" class="btn btn-creamy" ${pet.is_reserved === '1' ? 'disabled' : ''}> <b>${pet.is_reserved === '1' ? 'Reserved' : 'Add to Cart'} </b> </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            </form>
+                            </div>
+                            `;
+                            // Append the card HTML to the container
+                            $('#PetCardContainer').append(cardHtml);
+
+
+                            
+                        });
+                    }
+                },
+                error: function (error) {
+                    console.error('Error fetching doctors:', error);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
