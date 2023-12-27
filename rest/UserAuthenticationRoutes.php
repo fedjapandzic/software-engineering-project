@@ -423,7 +423,7 @@ Flight::route('POST /addToCart', function(){
 Flight::route('GET /getPetsInCart', function(){
     global $db;
     $cart_id = $_SESSION['cart_id'];
-    $get_pets_query = "SELECT pets.name, pets.price, pets.image_link, pets.is_available
+    $get_pets_query = "SELECT pets.name, pets.price, pets.image_link, pets.is_available, pets.is_reserved
                        FROM pets
                        JOIN cart ON pets.cart_id = cart.uid
                        WHERE cart.uid = $cart_id";
