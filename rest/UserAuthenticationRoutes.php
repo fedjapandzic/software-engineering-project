@@ -290,30 +290,31 @@ Flight::route('POST /sendNewPass',function(){
 });
 
 Flight::route('POST /sendSMSCode', function(){
-    $code = str_pad(rand(0, pow(10, 4)-1), 4, '0', STR_PAD_LEFT);
+    // $code = str_pad(rand(0, pow(10, 4)-1), 4, '0', STR_PAD_LEFT);
+    $code = 1234;
     $_SESSION['code']=$code;
     $phone = $_SESSION['phone_number'];
-    $ch = curl_init();
+    // $ch = curl_init();
 
-    curl_setopt($ch, CURLOPT_URL, "https://rest.nexmo.com/sms/json");
-    curl_setopt($ch, CURLOPT_POST, 1);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query(array(
-        'from' => 'Vonage APIs',
-        'text' => "Your code: $code",
-        'to' => "$phone",
-        'api_key' => getenv('NEXMO_API_KEY'),
-        'api_secret' => getenv('NEXMO_API_SECRET')
-    )));
+    // curl_setopt($ch, CURLOPT_URL, "https://rest.nexmo.com/sms/json");
+    // curl_setopt($ch, CURLOPT_POST, 1);
+    // curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query(array(
+    //     'from' => 'Vonage APIs',
+    //     'text' => "Your code: $code",
+    //     'to' => "$phone",
+    //     'api_key' => getenv('NEXMO_API_KEY'),
+    //     'api_secret' => getenv('NEXMO_API_SECRET')
+    // )));
 
-    $result = curl_exec($ch);
+    // $result = curl_exec($ch);
 
-    if (curl_errno($ch)) {
-        echo 'cURL error: ' . curl_error($ch);
-    }
+    // if (curl_errno($ch)) {
+    //     echo 'cURL error: ' . curl_error($ch);
+    // }
 
-    curl_close($ch);
+    // curl_close($ch);
 
-    echo $result;
+    // echo $result;
     Flight::redirect('/twofactorauthenticator');
 });
 
@@ -417,6 +418,28 @@ Flight::route('POST /addToCart', function(){
     $update_pet_query = "UPDATE pets SET cart_id = '$cart_id', is_reserved = 1 WHERE name= '$pet_name'";
     pg_query($db, $update_pet_query);
     Flight::redirect('/petshop');
+});
+
+Flight::route('GET /getPetsInCart', function(){
+    global $db;
+    $cart_id = $_SESSION['cart_id'];
+    $get_pets_query = "SELECT pet.name, pet.price, pet.image_link
+                       FROM pet
+                       JOIN cart ON pet.cart_id = cart.uid
+                       WHERE cart.uid = $cart_id";
+    $result = pg_query($db,$get_pets_query);
+    
+    if ($result) {
+        $pets = array();
+        while ($row = pg_fetch_assoc($result)) {
+            $pets[] = $row;
+        }
+        Flight::json($pets);
+    } else {
+        echo pg_last_error($db);
+    }
+
+
 });
 
 Flight::start();
