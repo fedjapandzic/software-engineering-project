@@ -80,7 +80,7 @@
                                         <div class="col-sm" align="center">
                                             <form action="/cancelReservation" method="post">
                                                 <input type="hidden" name="pet_name" value="${pet.name}">
-                                                ${pet.is_reserved === '1' && pet.is_available === '1' ? '<button type="button" class="btn btn-danger" type="submit">Cancel reservation</button>' : ''}
+                                                ${pet.is_reserved === '1' && pet.is_available === '1' ? '<button type="submit" class="btn btn-danger">Cancel reservation</button>' : ''}
                                             </form>
                                         </div>
                                     </div>
