@@ -423,7 +423,7 @@ Flight::route('POST /addToCart', function(){
 Flight::route('GET /getPetsInCart', function(){
     global $db;
     $cart_id = $_SESSION['cart_id'];
-    $get_pets_query = "SELECT pets.name, pets.price, pets.image_link
+    $get_pets_query = "SELECT pets.name, pets.price, pets.image_link, pets.is_available
                        FROM pets
                        JOIN cart ON pets.cart_id = cart.uid
                        WHERE cart.uid = $cart_id";
@@ -439,6 +439,15 @@ Flight::route('GET /getPetsInCart', function(){
         echo pg_last_error($db);
     }
 
+
+});
+
+Flight::route('POST /reservePet', function(){
+    global $db;
+    $pet_name = Flight::request()->data->pet_name;
+    $update_pet_query = "UPDATE pets SET cart_id = '$cart_id', is_available = 1 WHERE name= '$pet_name'";
+    pg_query($db, $update_pet_query);
+    Flight::redirect('/cart');
 
 });
 

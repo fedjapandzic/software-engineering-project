@@ -63,6 +63,13 @@ Flight::route('/petshop', function(){
         Flight::redirect('/login');
     }
     include 'html/shop.html';
-})
+});
+
+Flight::route('/cart', function(){
+    if(!isset($_SESSION['id'])){
+        Flight::redirect('/login');
+    }
+    include 'html/cart.html';
+});
 
 ?>

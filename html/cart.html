@@ -40,7 +40,61 @@
         </div>
     </div>
 
+    <script>
+        
+        $(document).ready(function () {
+            // AJAX call to fetch pets
+            $.ajax({
+                url: 'https://se-project-vcc8.onrender.com/pets',
+                method: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    // Process the data and create doctor cards
+                    if (data && data.length > 0) {
+                        data.forEach(function (pet) {
+                            // Dynamically create a card for each doctor
+                            var cardHtml = `
+                            
+                            <div class="col-md-3" style="margin-bottom: 5px;">
+                                <form action="/reservePet" method="post">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <img src="${pet.image_link}" alt="this is an image" style="object-fit: cover; width: 100%; height: 200px;">
+                                    </div>
+                                    <div class="row" align="center" style="margin-top: 10px;">
+                                        <div class="col-md-6">
+                                            <h5>Pet name: ${pet.name}</h5>
+                                            <input type="hidden" name="pet_name" value="${pet.name}">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <p>Pet price: $ ${pet.price}</p>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm" align="center">
+                                            <button type="submit" class="btn btn-creamy" ${pet.is_available === '1' ? 'disabled' : ''}> <b>${pet.is_available === '1' ? 'Ready for pickup!' : 'Confirm reservation'} </b> </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            </form>
+                            </div>
+                            `;
+                            // Append the card HTML to the container
+                            $('#PetCardContainer').append(cardHtml);
 
+
+                            
+                        });
+                    }
+                },
+                error: function (error) {
+                    console.error('Error fetching doctors:', error);
+                }
+            });
+        });
+    </script>
 
 </body>
 </html>
