@@ -76,6 +76,14 @@
                                             <button type="submit" class="btn btn-creamy" ${pet.is_available === '0' ? 'disabled' : ''}> <b>${pet.is_available === '0' ? 'Ready for pickup!' : 'Confirm reservation'} </b> </button>
                                         </div>
                                     </div>
+                                    <div class="row">
+                                        <div class="col-sm" align="center">
+                                            <form action="/cancelReservation" method="post">
+                                                <input type="hidden" name="pet_name" value="${pet.name}">
+                                                ${pet.is_reserved === '1' && pet.is_available === '1' ? '<button type="button" class="btn btn-danger"Cancel reservation</button>' : ''}
+                                            </form>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             </form>

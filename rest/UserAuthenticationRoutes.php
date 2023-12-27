@@ -451,6 +451,14 @@ Flight::route('POST /reservePet', function(){
 
 });
 
+Flight::route('POST /cancelReservation', function(){
+    global $db;
+    $pet_name = Flight::request()->data->pet_name;
+    $update_pet_query = "UPDATE pets SET is_reserved = '0', cart_id = 3 WHERE name = '$pet_name'";
+    pg_query($db, $update_pet_query);
+    Flight::redirect('/cart');
+});
+
 Flight::start();
 
 ?>
