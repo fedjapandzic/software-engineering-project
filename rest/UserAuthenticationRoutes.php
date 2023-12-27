@@ -445,7 +445,8 @@ Flight::route('GET /getPetsInCart', function(){
 Flight::route('POST /reservePet', function(){
     global $db;
     $pet_name = Flight::request()->data->pet_name;
-    $update_pet_query = "UPDATE pets SET cart_id = '$cart_id', is_available = 1 WHERE name= '$pet_name'";
+    $cart_id = $_SESSION['cart_id'];
+    $update_pet_query = "UPDATE pets SET cart_id = '$cart_id', is_available = 0 WHERE name= '$pet_name'";
     pg_query($db, $update_pet_query);
     Flight::redirect('/cart');
 
