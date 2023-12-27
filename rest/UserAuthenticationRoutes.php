@@ -292,7 +292,7 @@ Flight::route('POST /sendNewPass',function(){
 Flight::route('POST /sendSMSCode', function(){
     // $code = str_pad(rand(0, pow(10, 4)-1), 4, '0', STR_PAD_LEFT);
     $code = 1234;
-    $_SESSION['code']=$code;
+    $_SESSION['code']= $code;
     $phone = $_SESSION['phone_number'];
     // $ch = curl_init();
 
@@ -423,9 +423,9 @@ Flight::route('POST /addToCart', function(){
 Flight::route('GET /getPetsInCart', function(){
     global $db;
     $cart_id = $_SESSION['cart_id'];
-    $get_pets_query = "SELECT pet.name, pet.price, pet.image_link
-                       FROM pet
-                       JOIN cart ON pet.cart_id = cart.uid
+    $get_pets_query = "SELECT pets.name, pets.price, pets.image_link
+                       FROM pets
+                       JOIN cart ON pets.cart_id = cart.uid
                        WHERE cart.uid = $cart_id";
     $result = pg_query($db,$get_pets_query);
     
