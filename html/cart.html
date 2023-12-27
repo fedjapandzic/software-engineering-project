@@ -56,7 +56,6 @@
                             var cardHtml = `
                             
                             <div class="col-md-3" style="margin-bottom: 5px;">
-                                <form action="/reservePet" method="post">
                             <div class="card">
                                 <div class="card-body">
                                     <div class="row">
@@ -73,8 +72,11 @@
                                     </div>
                                     <div class="row">
                                         <div class="col-sm" align="center">
-                                            <button type="submit" class="btn btn-creamy" ${pet.is_available === '0' ? 'disabled' : ''}> <b>${pet.is_available === '0' ? 'Ready for pickup!' : 'Confirm reservation'} </b> </button>
-                                        </div>
+                                            <form action="/reservePet" method="post">
+                                                <input type="hidden" name="pet_name" value="${pet.name}">
+                                                <button type="submit" class="btn btn-creamy" ${pet.is_available === '0' ? 'disabled' : ''}> <b>${pet.is_available === '0' ? 'Ready for pickup!' : 'Confirm reservation'} </b> </button>
+                                            </form>    
+                                            </div>
                                     </div>
                                     <div class="row">
                                         <div class="col-sm" align="center">
@@ -86,7 +88,6 @@
                                     </div>
                                 </div>
                             </div>
-                            </form>
                             </div>
                             `;
                             // Append the card HTML to the container
