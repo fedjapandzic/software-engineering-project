@@ -66,6 +66,10 @@ class ComposerStaticInit3f2492347fb74a1db93598db54a6b39c
             'GrahamCampbell\\ResultType\\' => 26,
             'Giggsey\\Locale\\' => 15,
         ),
+        'F' => 
+        array (
+            'Facebook\\WebDriver\\' => 19,
+        ),
         'D' => 
         array (
             'Dotenv\\' => 7,
@@ -161,6 +165,10 @@ class ComposerStaticInit3f2492347fb74a1db93598db54a6b39c
         'Giggsey\\Locale\\' => 
         array (
             0 => __DIR__ . '/..' . '/giggsey/locale/src',
+        ),
+        'Facebook\\WebDriver\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/facebook/webdriver/lib',
         ),
         'Dotenv\\' => 
         array (

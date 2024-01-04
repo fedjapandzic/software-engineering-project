@@ -5,6 +5,7 @@
         "giggsey/libphonenumber-for-php": "^8.13",
         "phpmailer/phpmailer": "^6.8",
         "vonage/client": "^4.0",
-        "vlucas/phpdotenv": "^5.6"
+        "vlucas/phpdotenv": "^5.6",
+        "facebook/webdriver": "^1.1"
     }
 }

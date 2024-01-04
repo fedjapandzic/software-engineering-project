@@ -28,5 +28,6 @@ return array(
     'GuzzleHttp\\' => array($vendorDir . '/guzzlehttp/guzzle/src'),
     'GrahamCampbell\\ResultType\\' => array($vendorDir . '/graham-campbell/result-type/src'),
     'Giggsey\\Locale\\' => array($vendorDir . '/giggsey/locale/src'),
+    'Facebook\\WebDriver\\' => array($vendorDir . '/facebook/webdriver/lib'),
     'Dotenv\\' => array($vendorDir . '/vlucas/phpdotenv/src'),
 );
